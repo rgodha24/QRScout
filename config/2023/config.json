@@ -20,15 +20,14 @@
           "code": "teamNumber"
         },
         {
-          "title": "Drivetrain",
+          "title": "Good",
           "type": "select",
           "required": true,
           "choices": {
-            "mech": "Mechanum",
-            "tank": "Tank",
-            "swerve": "Swerve"
+            "y": "yes", 
+            "n": "no"
           },
-          "code": "drivetrain"
+          "code": "good"
         }
       ]
     }
