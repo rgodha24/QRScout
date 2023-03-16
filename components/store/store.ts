@@ -1,4 +1,4 @@
-import create from 'zustand'
+import { create } from 'zustand'
 import { Config } from '../inputs/BaseInputProps'
 import configJson from '../../config/2023/config.json'
 import { createStore } from './createStore'
@@ -35,6 +35,28 @@ export const useQRScoutState = createStore<QRScoutState>(
     version: 1,
   }
 )
+
+export const useAllQrState = create<{
+  state: Map<number, QRScoutState>
+  get: (team: number) => QRScoutState | undefined
+  addQrToState: (team: number, newState: Config) => void
+  getTeamsInStore: () => number[]
+}>((set) => ({
+  state: new Map<number, QRScoutState>(),
+  get(team) {
+    return this.state.get(team)
+  },
+  addQrToState(team, newState) {
+    set((state) => {
+      state.state.set(team, { formData: newState, showQR: false })
+      return state
+    })
+  },
+  getTeamsInStore() {
+    console.log(this.state)
+    return Array.from(this.state.keys())
+  }
+}))
 
 export function updateValue(sectionName: string, code: string, data: any) {
   useQRScoutState.setState(
@@ -96,3 +118,14 @@ export function getQRCodeData(): string {
     .map((v) => `${v.value}`.replace(/\n/g, ' '))
     .join('\t')
 }
+
+export function getQrCodeDataForTeam(team: number): string | undefined {
+  return useAllQrState
+    .getState()
+    .get(team)
+    ?.formData.sections.map((s) => s.fields)
+    .flat()
+    .map((v) => `${v.value}`.replace(/\n/g, ' '))
+    .join('\t')
+}
+

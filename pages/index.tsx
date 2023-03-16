@@ -1,19 +1,19 @@
 import Head from 'next/head'
-import Image from 'next/image'
 import { useMemo, useState } from 'react'
 import Button, { Variant } from '../components/core/Button'
 import QRModal from '../components/QRModal'
 import Section from '../components/Section'
 import {
-  getQRCodeData,
   resetSections,
   uploadConfig,
+  useAllQrState,
   useQRScoutState,
 } from '../components/store/store'
 import { useTheme } from 'next-themes'
 
 export default function Home() {
   const formData = useQRScoutState((state) => state.formData)
+  const store = useAllQrState()
   const { theme, setTheme } = useTheme()
 
   const [showQR, setShowQR] = useState(false)
@@ -75,7 +75,6 @@ export default function Home() {
         <QRModal
           show={showQR}
           title={`${getFieldValue('robot')} - ${getFieldValue('matchNumber')}`}
-          data={getQRCodeData()}
           onDismiss={() => setShowQR(false)}
         />
 
@@ -89,10 +88,28 @@ export default function Home() {
               <button
                 className="focus:shadow-outline mx-2 rounded bg-gray-700 py-6 px-6 font-bold uppercase text-white hover:bg-gray-700 focus:shadow-lg focus:outline-none disabled:bg-gray-300 dark:bg-red-rhr"
                 type="button"
-                onClick={() => setShowQR(true)}
+                onClick={() => {
+                  store.addQrToState(
+                    Number(
+                      formData.sections[0].fields.find(
+                        (a) => a.code === 'teamNumber'
+                      )?.value || Math.random()
+                    ),
+                    formData
+                  )
+                }}
                 disabled={missingRequiredFields.length > 0}
               >
                 Commit
+              </button>
+              <button
+                className="focus:shadow-outline mx-2 rounded bg-blue-700 mt-4 py-3 px-6 font-bold uppercase text-white hover:bg-gray-700 focus:shadow-lg focus:outline-none disabled:bg-gray-300 dark:bg-blue-600"
+                type="button"
+                onClick={() => {
+                  setShowQR(true)
+                }}
+              >
+                Open QR
               </button>
               <button
                 className="focus:shadow-outline mx-2 my-6 rounded border border-red-rhr bg-white py-2 font-bold uppercase text-red-rhr hover:bg-red-200 focus:outline-none dark:bg-gray-500 dark:text-white dark:hover:bg-gray-700"

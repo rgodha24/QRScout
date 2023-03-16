@@ -1,14 +1,17 @@
-import React from 'react'
+import React, { useState } from 'react'
 import QRCode from 'qrcode.react'
+import { getQrCodeDataForTeam, useAllQrState } from './store/store'
 
 export interface QRModalProps {
   show: boolean
   title: string
-  data: string
   onDismiss: () => void
 }
 
 export default function QRModal(props: QRModalProps) {
+  const store = useAllQrState()
+  const [selectedTeam, setSelectedTeam] = useState<number | undefined>()
+  const data = selectedTeam ? getQrCodeDataForTeam(selectedTeam) : undefined
   return (
     <>
       {props.show && (
@@ -17,16 +20,28 @@ export default function QRModal(props: QRModalProps) {
             className="fixed inset-0 h-full w-full overflow-y-auto bg-gray-600 bg-opacity-50"
             id="my-modal"
           />
-          <div className="fixed top-20 rounded-md border bg-white p-5 shadow-lg">
+          <div className="fixed top-20 rounded-md border bg-white text-black p-5 shadow-lg">
             <div className="flex flex-col items-center">
-              <h1 className="text-4xl">{props.title.toUpperCase()}</h1>
-              <QRCode className="m-2 mt-4" size={256} value={props.data} />
+              <h1 className="text-4xl">
+                {!!selectedTeam
+                  ? 'pit data for ' + selectedTeam
+                  : 'Choose the team to show pit data for'}
+              </h1>
+              <select
+                name="team"
+                id="team"
+                value={selectedTeam}
+                onChange={(e) => setSelectedTeam(Number(e.target.value))}
+              >
+                {store.getTeamsInStore().map((team) => (
+                  <option key={team} value={team}>
+                    Team {team}
+                  </option>
+                ))}
+              </select>
+              <QRCode className="m-2 mt-4" size={256} value={data || ''} />
               <div className="mt-4 flex w-full flex-row items-center justify-between">
-                <div
-                  onClick={() =>
-                    navigator.clipboard.writeText(props.data + '\n')
-                  }
-                >
+                <div onClick={() => navigator.clipboard.writeText(data + '\n')}>
                   <svg
                     className="mr-4 h-8 w-8 text-gray-500 hover:text-gray-800 "
                     width="24"
